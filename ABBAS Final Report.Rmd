@@ -1,0 +1,90 @@
+---
+title: "The development of a valid and usable creativity test requires big-data and psychometrics"
+author: "Claire Stevenson, Matthijs Baas & Han van der Maas"
+date: "4/17/2020"
+output: html_document
+---
+
+    Contact Information:
+
+    dr. Claire Stevenson
+        
+    Universiteit van Amsterdam 
+
+    Psychologische Methodenleer 
+
+    Postbus 15906 
+        
+    1001 NK, Amsterdam 
+        
+    e-mail: c.e.stevenson@uva.nl
+        
+    phone:06-24856128
+
+*Introduction to the report. Description of the phases and main aim. Main outcome.*
+
+In this final report, we present our results of the project “The development of a valid and usable creativity test requires big-data and psychometrics”. The project consisted of two phases. First, the creation of a large database of responses to the Dutch version of the “Alternative Uses Task” (AUT). Second, the development of an automated scoring algorithm and a subsequent test of its reliability and validity. Both, the database and the final algorithm will be made available to the contributing researchers.  
+
+The main aim of the project was to establish a reliable and automated way to score the AUT that will make future data scoring faster and more cost-efficient. Meanwhile, the automated scoring guarantees that the same AUT response in Dutch receives the same creativity score regardless of where the data was collected and scored.  
+
+The algorithm was created in two parts. In a pilot study, a first version of the algorithm was developed and showed adequate reliability and validity. In a second step, the initial algorithm was taken as basis for a newer and improved scoring algorithm. This final version was then tested on two different samples for its reliability and validity in scoring the AUT. As our validation studies showed, the developed algorithm reliably scores new AUT responses similar to common expert scoring. In addition, showed [good/satisfactory] results on various validation measures, for both a student sample and a population sample. 
+
+**1. Phase: Database**
+
+- *Description of the Phase (background & intention)*
+
+- *Characteristics of the database (i.e., items included, participating researchers)*
+
+- *Scoring combination of Utility & Originality to achieve a consensual creativity score*
+
+In the first phase, we created a large database which combined AUT data from various creativity researchers in the Netherlands. Our intention was to have a large database of Dutch AUT data scored by experts for which we could train an automated scoring algorithm on.
+
+**1.1. Database Design**
+
+The following information (when available) were included for each case:
+
+- *Research*: Principle investigator, institute where research was conducted, year of 
+data collection, design / experimental manipulations, place of research. 
+
+- *Rater*: age, experience, role (e.g., research assistant, PhD student, PI), inter-rater reliability.
+
+- *Subjects*: age, gender. 
+
+- *Task*: Object (e.g., Brick, Newspaper), available time for task, instructions.
+
+- *Responses*: response, standardized response (spelling mistakes corrected, formulation made uniform), category of response (e.g., for Brick this could be: a building block, art, weight, etc.), time at which response is recorded/sequence of responses.
+
+- *Scores*: creativity, utility originality scores (usually a 5-point Likert Scale).
+
+**1.2. Combined Creativity Score**
+
+One problem in the creativity literature is the lack of consensus how divergent thinking should be scored. Some researchers simply score the creativity of each response on a 5-point Likert scale ranging from (0) not creative at all to (5) highly creative. Others score creativity divergent thinking tasks using different components. For example, using a brick as a toothbrush can be considered very original, yet it is extremely impractical. Thus, in some research contexts it is desirable to score a response on both their “Originality” as well as their “Utility”. To create a coherent database, we combined these two scores (i.e., Originality and Utility) to an overall “creativity” score which matched those used by most other researchers (i.e., on a 5-point Likert scale). The literature suggests that people’s perception of “creativity” is mostly driven by the originality of the response, however, it must also be somewhat feasible. The combined score is therefore a weighted average between both scores. Around 500 responses that had initially been scored only on utility and originality were scored again by two independent raters on the more common 5-point Likert scale ranging from (0) not creative at all to (5) highly creative. To test which combination of originality and utility best describes “creativity”, a set of different models were designed that gave different weights to each component:  
+
+                        CombinedScore = 𝛾 × OriginalityScore + 𝜃 × UtilityScore
+. 
+where the weighting parameters, γ and θ, were varied from 0 - 1 in 0.1 steps and summed up to 1 (i.e.,𝛾+𝜃= 0.8 + 0.2 = 1) . Overall, this resulted in 11 different models. Each model was regressed onto the newly scored creativity score to establish which weighting resembled the “creativity” score best. Model comparison using the BIC and AIC showed that the creativity score is best predicted by a combination of 90% originality and 10% utility scores, which supports the existing literature that regards originality as more important than utility.  
+
+Those responses that had been coded on both utility and originality were given the additional combined creativity score in the database. This allows for a better comparison between data from different researchers.  
+
+**1.3. Data Overview**
+
+Table 1. *Overview of number of participants and responses currently in our AUT database.*
+
+**INSERT TABLE IRIS**
+
+**2. Phase: Reliability and Validity of the AUT**
+
+*2.1. AUT scoring algorithm*
+
+In the following section, a step by step description will be provided of the algorithm which was used to establish an automated method of scoring the AUT. For starters we will take a look at one of the AUT datasets which was used for the algorithm. In the table below, you can see that original responses to the AUT were cleaned (e.g., spellings checked, remove stopwords, etc) into "cleaned responses". It is also clear, that this dataset belongs to the object "brick" and that the creativity scores provided by the experts are displayed under column "creativity". Keep in mind that the creativity scores are based on originality and utility as previously described. 
+
+```{r echo = FALSE, results = 'asis', warning = FALSE, message = FALSE}
+library(knitr)
+library(readr)
+data = read_csv("/Users/Emma 1/Downloads/ABBAS/example_data.csv")
+kable(data[1:5,], caption = "Data Table: Brick")
+```
+
+Based on this data, an algorithm was developed which is able to predict the creativity score based on the response some participant gave. So, you may ask; what causes certain responses to have the same creativity scores and how do we predict this? Previous research suggest that responses to divergent thinking tasks, such as the AUT, group (cluster) together based on how semanticaly similar the responses are. For example, the response "build a house" and "build a street" are semanticaly similar. Moreover, they are also similarly creative, as they both suggest using a brick as a building block. This suggests that these responses should have the same creativity scores. 
+
+Based on this given, semantic similarity between responses seem to be a good predicitive feature for the scoring of creativity. 
