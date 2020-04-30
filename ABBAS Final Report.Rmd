@@ -1,8 +1,11 @@
 ---
-title: "The development of a valid and usable creativity test requires big-data and psychometrics"
+title: The development of a valid and usable creativity test requires big-data and
+  psychometrics
 author: "Claire Stevenson, Matthijs Baas & Han van der Maas"
 date: "4/17/2020"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
     Contact Information:
@@ -76,15 +79,53 @@ Table 1. *Overview of number of participants and responses currently in our AUT 
 
 *2.1. AUT scoring algorithm*
 
-In the following section, a step by step description will be provided of the algorithm which was used to establish an automated method of scoring the AUT. For starters we will take a look at one of the AUT datasets which was used for the algorithm. In the table below, you can see that original responses to the AUT were cleaned (e.g., spellings checked, remove stopwords, etc) into "cleaned responses". It is also clear, that this dataset belongs to the object "brick" and that the creativity scores provided by the experts are displayed under column "creativity". Keep in mind that the creativity scores are based on originality and utility as previously described. 
+In the following section, a step by step description will be provided of the algorithm which was used to establish an automated method of scoring the AUT. For starters we will take a look at one of the AUT datasets which was used for the algorithm. In the table below, you can see that original responses to the AUT were cleaned (e.g., spelling checked, remove stop words, etc.) into "cleaned responses". It is also noticeable, that this dataset belongs to the object "brick" and that the creativity scores provided by the experts are displayed under column "creativity". Keep in mind that the creativity scores are based on originality and utility, as previously described.
 
 ```{r echo = FALSE, results = 'asis', warning = FALSE, message = FALSE}
 library(knitr)
 library(readr)
+library(tidyverse)
+
 data = read_csv("/Users/Emma 1/Downloads/ABBAS/example_data.csv")
-kable(data[1:5,], caption = "Data Table: Brick")
+kable(data[11:15, 2:5], caption = "Data Table: Brick")
 ```
 
-Based on this data, an algorithm was developed which is able to predict the creativity score based on the response some participant gave. So, you may ask; what causes certain responses to have the same creativity scores and how do we predict this? Previous research suggest that responses to divergent thinking tasks, such as the AUT, group (cluster) together based on how semanticaly similar the responses are. For example, the response "build a house" and "build a street" are semanticaly similar. Moreover, they are also similarly creative, as they both suggest using a brick as a building block. This suggests that these responses should have the same creativity scores. 
+Based on this data, an algorithm was developed which is able to predict the creativity score based on the response some participant gave. So, now you may ask; what causes certain responses to have the same creativity scores and how do we predict this? Previous research suggests that responses to divergent thinking tasks, such as the AUT, group (cluster) together based on how semantically similar the responses are. For example, the response "build a house" and "build a street" are semantically similar. Moreover, they are also similarly creative, as they both suggest using a brick as a building block. This suggests that these responses should have the same creativity scores.
 
-Based on this given, semantic similarity between responses seem to be a good predicitive feature for the scoring of creativity. 
+Based on this given, semantic similarity between responses seem to be a good predictive feature for the scoring of creativity. To use this feature for the prediction model, the algorithm needed some understanding of language to determine semantic similarity between responses. This understanding can be taught by use of sentence embeddings. Sentence embeddings are vector (numeric) representations of sentences which maintain semantic information. Thus, the previous named responses "build a house" and "build a street" should have a very similar sentence embedding (vector representation). Based on these representations, similarity can be measured based on the cosine angle between two sentence embeddings. This will be explained in more detail later on. First, we will discuss the method that was used to extract these sentence embeddings.
+
+To extract sentence embeddings for the responses to the AUT task, we first extracted word embeddings. Word embeddings were based on Word2Vec pretrained word embeddings. Word2Vec is a method which processes text by 'vectorizing' words. Given enough data, usage and context, Word2Vec can provide highly accurate guesses on a word meaning which is based on its past experiences. For every word in the AUT database, we extracted word embeddings based on pretrained word embeddings from Word2Vec (link....).
+
+Based on these word embeddings, sentence embeddings were created by taking the unweighted average of the word embeddings. Next to this, the creativity scores given by the different raters were combined into one table. The average of the two creativity scores was calculated as final creativity score. A data table was created which contains the creativity scores of the two raters, the final creativity scores and the sentence embeddings. This looked like this:
+
+```{r echo = FALSE, results = 'asis', warning = FALSE, message = FALSE}
+library(knitr)
+library(readr)
+data_with_emb = read_csv("/Users/Emma 1/Downloads/ABBAS/example_with_emb_data.csv")
+knitr::kable(data_with_emb[11:15, 2:7], caption = "Data Table: Brick with Embeddings")
+```
+
+Now it is time to make predictions based on these sentence embeddings. To do so, a clustering algorithm was used (hierarchical clustering). The dataset was clustered based on the sentence embeddings. Thus, semantically similar responses were clustered together. The number of clusters is a hyperparameter, this means that different numbers of clusters needed to be tested. The number of clusters was selected based on the variance within clusters being the lowest. Here we looked at the variance of the creativity score, for a low creativity score variance within clusters suggests that the clusters describe a certain level of creativity well. Therefore, we looking at different clusters sizes and selected the one which obtained the lowest within cluster variance on creativity scores.
+
+The next step was to select a response for every cluster which represented the cluster the best. This was selected based on the embedding which was most central to the other embeddings in the cluster. So, you can imagine this is the sentence embedding which is semantically most similar to all the other sentence embeddings within that particular cluster. These results were represented in a data frame, containing the clusters, the most representative responses per cluster, the mean and median of the creativity scores within the clusters and the corresponding most representative sentence embedding. This looked like this:
+
+```{r echo = FALSE, results = 'asis', warning = FALSE, message = FALSE}
+library(knitr)
+library(readr)
+data_clust = read_csv("/Users/Emma 1/Downloads/ABBAS/example_rep_clusters.csv")
+knitr::kable(data_clust[1:5, 2:6], caption = "Data Table: Reprentive clusters")
+```
+
+Based on this data frame, containing the most representative responses for each cluster, we were able to predict the creativity scores for new responses. For every new response, a sentence embedding is created. This new sentence embedding is than compared to all the sentence embeddings from the previous data frame. As previously explained, the semantic distance between sentence embeddings can be calculated. Thus, the new response will be assigned the creativity score of the cluster it is semantically most similar to. For example, the new response "bus" would be semantically most similar to the response "car (auto)" in the above data table. Therefore, this new response "bus" would be assigned a creativity score of 2.80, which belongs to the cluster of "car (auto)".
+
+The algorithm which is described here was trained on large datasets (size...) and tested on about 20% of the entire scored dataset (first data table). Prediction accuracy was measured on the test data, which was 75% for the brick data and 80% for the fork data.
+
+
+
+
+
+
+
+
+
+
