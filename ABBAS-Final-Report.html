@@ -415,12 +415,11 @@ phone:06-24856128</code></pre>
 <p><strong>INSERT TABLE IRIS</strong></p>
 <p><strong>2. Phase: Reliability and Validity of the AUT</strong></p>
 <p><em>2.1. AUT scoring algorithm</em></p>
-<p>In the following section, a step by step description will be provided of the algorithm which was used to establish an automated method of scoring the AUT. For starters we will take a look at one of the AUT datasets which was used for the algorithm. In the table below, you can see that original responses to the AUT were cleaned (e.g., spellings checked, remove stopwords, etc) into “cleaned responses”. It is also clear, that this dataset belongs to the object “brick” and that the creativity scores provided by the experts are displayed under column “creativity”. Keep in mind that the creativity scores are based on originality and utility as previously described.</p>
+<p>In the following section, a step by step description will be provided of the algorithm which was used to establish an automated method of scoring the AUT. For starters we will take a look at one of the AUT datasets which was used for the algorithm. In the table below, you can see that original responses to the AUT were cleaned (e.g., spelling checked, remove stop words, etc.) into “cleaned responses”. It is also noticeable, that this dataset belongs to the object “brick” and that the creativity scores provided by the experts are displayed under column “creativity”. Keep in mind that the creativity scores are based on originality and utility, as previously described.</p>
 <table>
 <caption>Data Table: Brick</caption>
 <thead>
 <tr class="header">
-<th align="right">X1</th>
 <th align="left">object</th>
 <th align="left">original_response</th>
 <th align="left">cleaned_response</th>
@@ -429,44 +428,149 @@ phone:06-24856128</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="right">1</td>
 <td align="left">brick</td>
-<td align="left">aangeven dat je in nood bent door er lawaai mee te maken</td>
-<td align="left">aangeven nood bent lawaai</td>
-<td align="right">3.9</td>
+<td align="left">bankje</td>
+<td align="left">bankje</td>
+<td align="right">3.0</td>
 </tr>
 <tr class="even">
-<td align="right">2</td>
 <td align="left">brick</td>
-<td align="left">afbakening</td>
-<td align="left">afbakening</td>
+<td align="left">barbecue</td>
+<td align="left">barbecue</td>
+<td align="right">3.1</td>
+</tr>
+<tr class="odd">
+<td align="left">brick</td>
+<td align="left">om op te bbq’en</td>
+<td align="left">barbecueën</td>
+<td align="right">3.1</td>
+</tr>
+<tr class="even">
+<td align="left">brick</td>
+<td align="left">bed</td>
+<td align="left">bed</td>
+<td align="right">3.1</td>
+</tr>
+<tr class="odd">
+<td align="left">brick</td>
+<td align="left">Een bed van bouwen</td>
+<td align="left">bed bouwen</td>
 <td align="right">2.2</td>
-</tr>
-<tr class="odd">
-<td align="right">3</td>
-<td align="left">brick</td>
-<td align="left">anker</td>
-<td align="left">anker</td>
-<td align="right">3.0</td>
-</tr>
-<tr class="even">
-<td align="right">4</td>
-<td align="left">brick</td>
-<td align="left">auto</td>
-<td align="left">auto</td>
-<td align="right">3.7</td>
-</tr>
-<tr class="odd">
-<td align="right">5</td>
-<td align="left">brick</td>
-<td align="left">bakken</td>
-<td align="left">bakken</td>
-<td align="right">3.0</td>
 </tr>
 </tbody>
 </table>
-<p>Based on this data, an algorithm was developed which is able to predict the creativity score based on the response some participant gave. So, you may ask; what causes certain responses to have the same creativity scores and how do we predict this? Previous research suggest that responses to divergent thinking tasks, such as the AUT, group (cluster) together based on how semanticaly similar the responses are. For example, the response “build a house” and “build a street” are semanticaly similar. Moreover, they are also similarly creative, as they both suggest using a brick as a building block. This suggests that these responses should have the same creativity scores.</p>
-<p>Based on this given, semantic similarity between responses seem to be a good predicitive feature for the scoring of creativity.</p>
+<p>Based on this data, an algorithm was developed which is able to predict the creativity score based on the response some participant gave. So, now you may ask; what causes certain responses to have the same creativity scores and how do we predict this? Previous research suggests that responses to divergent thinking tasks, such as the AUT, group (cluster) together based on how semantically similar the responses are. For example, the response “build a house” and “build a street” are semantically similar. Moreover, they are also similarly creative, as they both suggest using a brick as a building block. This suggests that these responses should have the same creativity scores.</p>
+<p>Based on this given, semantic similarity between responses seem to be a good predictive feature for the scoring of creativity. To use this feature for the prediction model, the algorithm needed some understanding of language to determine semantic similarity between responses. This understanding can be taught by use of sentence embeddings. Sentence embeddings are vector (numeric) representations of sentences which maintain semantic information. Thus, the previous named responses “build a house” and “build a street” should have a very similar sentence embedding (vector representation). Based on these representations, similarity can be measured based on the cosine angle between two sentence embeddings. This will be explained in more detail later on. First, we will discuss the method that was used to extract these sentence embeddings.</p>
+<p>To extract sentence embeddings for the responses to the AUT task, we first extracted word embeddings. Word embeddings were based on Word2Vec pretrained word embeddings. Word2Vec is a method which processes text by ‘vectorizing’ words. Given enough data, usage and context, Word2Vec can provide highly accurate guesses on a word meaning which is based on its past experiences. For every word in the AUT database, we extracted word embeddings based on pretrained word embeddings from Word2Vec (link….).</p>
+<p>Based on these word embeddings, sentence embeddings were created by taking the unweighted average of the word embeddings. Next to this, the creativity scores given by the different raters were combined into one table. The average of the two creativity scores was calculated as final creativity score. A data table was created which contains the creativity scores of the two raters, the final creativity scores and the sentence embeddings. This looked like this:</p>
+<table>
+<caption>Data Table: Brick with Embeddings</caption>
+<thead>
+<tr class="header">
+<th align="left">object</th>
+<th align="left">cleaned_response</th>
+<th align="right">creativity_rater01</th>
+<th align="right">creativity_rater02</th>
+<th align="right">creativity</th>
+<th align="right">sent_embedding</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">brick</td>
+<td align="left">bankje</td>
+<td align="right">3.0</td>
+<td align="right">2.1</td>
+<td align="right">2.55</td>
+<td align="right">-0.034360</td>
+</tr>
+<tr class="even">
+<td align="left">brick</td>
+<td align="left">barbecue</td>
+<td align="right">3.1</td>
+<td align="right">3.1</td>
+<td align="right">3.10</td>
+<td align="right">0.030914</td>
+</tr>
+<tr class="odd">
+<td align="left">brick</td>
+<td align="left">bed</td>
+<td align="right">3.1</td>
+<td align="right">3.0</td>
+<td align="right">3.05</td>
+<td align="right">-0.031977</td>
+</tr>
+<tr class="even">
+<td align="left">brick</td>
+<td align="left">bed bouwen</td>
+<td align="right">2.2</td>
+<td align="right">2.1</td>
+<td align="right">2.15</td>
+<td align="right">-0.032372</td>
+</tr>
+<tr class="odd">
+<td align="left">brick</td>
+<td align="left">beeldhouwen</td>
+<td align="right">2.2</td>
+<td align="right">2.2</td>
+<td align="right">2.20</td>
+<td align="right">0.036021</td>
+</tr>
+</tbody>
+</table>
+<p>Now it is time to make predictions based on these sentence embeddings. To do so, a clustering algorithm was used (hierarchical clustering). The dataset was clustered based on the sentence embeddings. Thus, semantically similar responses were clustered together. The number of clusters is a hyperparameter, this means that different numbers of clusters needed to be tested. The number of clusters was selected based on the variance within clusters being the lowest. Here we looked at the variance of the creativity score, for a low creativity score variance within clusters suggests that the clusters describe a certain level of creativity well. Therefore, we looking at different clusters sizes and selected the one which obtained the lowest within cluster variance on creativity scores.</p>
+<p>The next step was to select a response for every cluster which represented the cluster the best. This was selected based on the embedding which was most central to the other embeddings in the cluster. So, you can imagine this is the sentence embedding which is semantically most similar to all the other sentence embeddings within that particular cluster. These results were represented in a data frame, containing the clusters, the most representative responses per cluster, the mean and median of the creativity scores within the clusters and the corresponding most representative sentence embedding. This looked like this:</p>
+<table>
+<caption>Data Table: Reprentive clusters</caption>
+<thead>
+<tr class="header">
+<th align="right">cluster</th>
+<th align="right">median</th>
+<th align="right">mean</th>
+<th align="left">represent</th>
+<th align="right">sent_embedding</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">3.15</td>
+<td align="right">3.00</td>
+<td align="left">verzwaring vrouw weegschaal staat wanneer denkt af vallen</td>
+<td align="right">-0.0001543</td>
+</tr>
+<tr class="even">
+<td align="right">2</td>
+<td align="right">2.20</td>
+<td align="right">2.21</td>
+<td align="left">afbakening</td>
+<td align="right">-0.0568580</td>
+</tr>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">3.00</td>
+<td align="right">2.92</td>
+<td align="left">anker boot</td>
+<td align="right">0.0348450</td>
+</tr>
+<tr class="even">
+<td align="right">4</td>
+<td align="right">3.00</td>
+<td align="right">2.80</td>
+<td align="left">auto</td>
+<td align="right">0.0332350</td>
+</tr>
+<tr class="odd">
+<td align="right">5</td>
+<td align="right">3.00</td>
+<td align="right">3.02</td>
+<td align="left">ei bakken</td>
+<td align="right">0.0479155</td>
+</tr>
+</tbody>
+</table>
+<p>Based on this data frame, containing the most representative responses for each cluster, we were able to predict the creativity scores for new responses. For every new response, a sentence embedding is created. This new sentence embedding is than compared to all the sentence embeddings from the previous data frame. As previously explained, the semantic distance between sentence embeddings can be calculated. Thus, the new response will be assigned the creativity score of the cluster it is semantically most similar to. For example, the new response “bus” would be semantically most similar to the response “car (auto)” in the above data table. Therefore, this new response “bus” would be assigned a creativity score of 2.80, which belongs to the cluster of “car (auto)”.</p>
+<p>The algorithm which is described here was trained on large datasets (size…) and tested on about 20% of the entire scored dataset (first data table). Prediction accuracy was measured on the test data, which was 75% for the brick data and 80% for the fork data.</p>
 
 
 
